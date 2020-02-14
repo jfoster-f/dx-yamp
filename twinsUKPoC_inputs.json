@@ -1,0 +1,11 @@
+{
+  "TwinsUKPoC.reads1_file": "resources/ERR011089_1.fastq.gz",
+  "TwinsUKPoC.reads2_file": "resources/ERR011089_2.fastq.gz",
+  "TwinsUKPoC.adapters_file": "resources/yamp_resources/adapters.fa",
+  "TwinsUKPoC.artifacts_file": "resources/yamp_resources/sequencing_artifacts.fa.gz",
+  "TwinsUKPoC.phix174ill_file": "resources/yamp_resources/phix174_ill.ref.fa.gz",
+  "TwinsUKPoC.prefix": "TwinsUKPoCTEST",
+  "TwinsUKPoC.ref_foreign_genome": "resources/reference_genome.tar.gz",
+  "TwinsUKPoC.bowtie2db_gz_file": "resources/yamp_resources/bowtie2db.tar.gz",
+  "TwinsUKPoC.chocophlan_gz_file": "resources/yamp_resources/chocophlan.tar.gz"
+}
