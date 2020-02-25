@@ -5,7 +5,12 @@
   "TwinsUKPoC.artifacts_file": "resources/yamp_resources/sequencing_artifacts.fa.gz",
   "TwinsUKPoC.phix174ill_file": "resources/yamp_resources/phix174_ill.ref.fa.gz",
   "TwinsUKPoC.prefix": "TwinsUKPoCTEST",
-  "TwinsUKPoC.ref_foreign_genome": "resources/reference_genome.tar.gz",
+  "TwinsUKPoC.ref_foreign_genome_gz_file": "resources/reference_genome.tar.gz",
   "TwinsUKPoC.bowtie2db_gz_file": "resources/yamp_resources/bowtie2db.tar.gz",
-  "TwinsUKPoC.chocophlan_gz_file": "resources/yamp_resources/chocophlan.tar.gz"
+  "TwinsUKPoC.chocophlan_gz_file": "resources/yamp_resources/chocophlan.tar.gz",
+  "TwinsUKPoC.bowtie2db_files_name": "mpa_v20",
+  "TwinsUKPoC.uniref_file": "resources/yamp_resources/uniref50/uniref50_annotated.1.1.dmnd",
+  "TwinsUKPoC.mpa_pkl_file": "resources/yamp_resources/bowtie2db/db_v20/mpa_v20_m200.pkl",
+  "TwinsUKPoC.logqc_file": "resources/yamp_resources/logQC.sh",
+  "TwinsUKPoC.fastqc_file": "resources/yamp_resources/fastqc.sh"
 }

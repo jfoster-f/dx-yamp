@@ -9,12 +9,14 @@ workflow TwinsUKPoC{
         File adapters_file
         File artifacts_file
         File phix174ill_file
-        File ref_foreign_genome_qz
+        File ref_foreign_genome_gz_file
         File mpa_pkl_file
         File bowtie2db_gz_file
         File chocophlan_gz_file
         File uniref_file
-        String bowtiedb_files_name
+        File logqc_file
+        File fastqc_file
+        String bowtie2db_files_name
         String bt2_options = "very-sensitive"
         String library_layout = "paired"
         String prefix
@@ -31,9 +33,11 @@ workflow TwinsUKPoC{
     }
     #if reads2 is not null i think we need to concatonate reads1 and reads2 maybe handle this as Array[File] and do in command block
     #where are step, stem and label defined in Nextflow?
-    call yamp.QualityAssessment as RawQC{
+    call yamp.QualityAssessment as RawQCR1{
         input:
             reads = reads1_file,
+            logqc_file = logqc_file,
+            fastqc_file = fastqc_file,
             step = "1",
             stem = "_R1",
             label = "_rawreads",
@@ -41,16 +45,22 @@ workflow TwinsUKPoC{
             docker_image = docker_image
     }
 
+    if (defined(reads2_file)) {
+        File reads2_file_opt = select_first([reads2_file])
     #if read2_file is not null then need to
-    call yamp.QualityAssessment as RawQC{
-        input:
-            reads = reads2_file,
-            step = "1",
-            stem = "_R2",
-            label = "_rawreads",
-            prefix = prefix,
-            docker_image = docker_image
+        call yamp.QualityAssessment as RawQCR2{
+            input:
+                reads = reads2_file_opt,
+                logqc_file = logqc_file,
+                fastqc_file = fastqc_file,
+                step = "1",
+                stem = "_R2",
+                label = "_rawreads",
+                prefix = prefix,
+                docker_image = docker_image
+        }
     }
+
 
     call yamp.Dedup {
         input:
@@ -63,10 +73,11 @@ workflow TwinsUKPoC{
     }
 
 
+
     call yamp.Trim {
         input:
             reads1_file = Dedup.dedupped_reads1,
-            reads2_file = Dedup.dedupped_reads2[0],
+            reads2_file = Dedup.dedupped_reads2,
             library_layout = library_layout,
             prefix = prefix,
             kcontaminants = kcontaminants,
@@ -84,6 +95,8 @@ workflow TwinsUKPoC{
     call yamp.QualityAssessment as TrimQC {
         input:
             reads = Trim.trimmed_reads,
+            logqc_file = logqc_file,
+            fastqc_file = fastqc_file,
             step = "4",
             stem = "",
             label = "_trimmedreads",
@@ -96,7 +109,7 @@ workflow TwinsUKPoC{
         input:
             infile1 = Trim.trimmed_reads,
             infile2 = Trim.trimmed_reads_r1,
-            infile12 = Trim.trimmed_reads_r1[0],
+            infile12 = Trim.trimmed_reads_r1,
             library_layout = library_layout,
             prefix = prefix,
             mind = mind,
@@ -104,13 +117,15 @@ workflow TwinsUKPoC{
             phred = phred,
             qin = qin,
             bwr = bwr,
-            ref_foreign_genome_gz = ref_foreign_genome_qz,
+            ref_foreign_genome_gz = ref_foreign_genome_gz_file,
             docker_image = docker_image
     }
 
     call yamp.QualityAssessment as DecontaminateQC {
         input:
             reads = Decontaminate.cleaned_reads,
+            logqc_file = logqc_file,
+            fastqc_file = fastqc_file,
             step = "6",
             stem = "",
             label = "_decontaminatedreads",
@@ -123,7 +138,7 @@ workflow TwinsUKPoC{
             in_file = Decontaminate.cleaned_reads,
             mpa_pkl_file = mpa_pkl_file,
             bowtie2db_gz_file = bowtie2db_gz_file,
-            bowtiedb_files_name = bowtiedb_files_name,
+            bowtie2db_files_name = bowtie2db_files_name,
             bt2_options = bt2_options,
             prefix = prefix,
             docker_image = docker_image
@@ -149,10 +164,10 @@ workflow TwinsUKPoC{
 
     output {
         File dedupped_reads1 = Dedup.dedupped_reads1
-        File dedupped_reads2 = Dedup.dedupped_reads2[0]
+        File? dedupped_reads2 = Dedup.dedupped_reads2
         File trimmed_reads = Trim.trimmed_reads
-        File raw_qc_html = RawQC.html_file
-        File raw_qc_fastqc = RawQC.fastqc_data_file
+        File raw_qc_html = RawQCR1.html_file
+        File raw_qc_fastqc = RawQCR1.fastqc_data_file
         File trim_qc_html = TrimQC.html_file
         File trim_qc_fastqc = TrimQC.fastqc_data_file
         File decontaminate_qc_html = DecontaminateQC.html_file
@@ -172,7 +187,6 @@ workflow TwinsUKPoC{
         File diamond_aligned_tsv_file = ProfileFunction.diamond_aligned_tsv_file
         File bowtie2_unaligned_file = ProfileFunction.bowtie2_unaligned_file
         File diamond_unaligned_file = ProfileFunction.diamond_unaligned_file
-
     }
 
 

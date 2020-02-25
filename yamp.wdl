@@ -30,10 +30,10 @@ task Dedup {
         docker_image:"Name of docker image to be used"
     }
 
-    #String cpus = "4"
-    String cpus = "1"
-    #String memory_amount = "32 GB"
-    String memory_amount = "4 GB"
+    String cpus = "4"
+    #String cpus = "1"
+    String memory_amount = "32 GB"
+    #String memory_amount = "4 GB"
     command <<<
         sysdate=$(date)
         starttime=$(date +%s.%N)
@@ -45,12 +45,12 @@ task Dedup {
         #Defines command for de-duplication
         if [ ~{library_layout} = "paired" ]; then
             #CMD="clumpify.sh -Xmx"$maxmem" in1=~{reads1_file} in2=~{reads2_file} out1=~{prefix}_dedupe_R1.fq out2=~{prefix}_dedupe_R2.fq qin=~{qin} dedupe subs=0 threads=~{cpus}"
-            #CMD="clumpify.sh in1=~{reads1_file} in2=~{reads2_file} out1=~{prefix}_dedupe_R1.fq out2=~{prefix}_dedupe_R2.fq qin=~{qin} dedupe subs=0 threads=~{cpus}"
-            CMD="clumpify.sh in1=~{reads1_file} in2=~{reads2_file} out1=~{prefix}_dedupe_R1.fq out2=~{prefix}_dedupe_R2.fq qin=~{qin} dedupe subs=0"
+            CMD="clumpify.sh in1=~{reads1_file} in2=~{reads2_file} out1=~{prefix}_dedupe_R1.fq out2=~{prefix}_dedupe_R2.fq qin=~{qin} dedupe subs=0 threads=~{cpus}"
+            #CMD="clumpify.sh in1=~{reads1_file} in2=~{reads2_file} out1=~{prefix}_dedupe_R1.fq out2=~{prefix}_dedupe_R2.fq qin=~{qin} dedupe subs=0"
         else
             #CMD="clumpify.sh -Xmx"$maxmem" in=~{reads1_file} out=~{prefix}_dedupe.fq qin=~{qin} dedupe subs=0 threads=~{cpus}"
-            #CMD="clumpify.sh in=~{reads1_file} out=~{prefix}_dedupe.fq qin=~{qin} dedupe subs=0 threads=~{cpus}"
-            CMD="clumpify.sh in=~{reads1_file} out=~{prefix}_dedupe.fq qin=~{qin} dedupe subs=0"
+            CMD="clumpify.sh in=~{reads1_file} out=~{prefix}_dedupe.fq qin=~{qin} dedupe subs=0 threads=~{cpus}"
+            #CMD="clumpify.sh in=~{reads1_file} out=~{prefix}_dedupe.fq qin=~{qin} dedupe subs=0"
         fi
         #Logs version of the software and executed command (BBmap prints on stderr)
         version=$(clumpify.sh --version 2>&1 >/dev/null | grep "BBMap version")
@@ -94,7 +94,7 @@ task Dedup {
 
     output {
         File dedupped_reads1 = prefix + "_dedupe_R1.fq"
-        Array[File] dedupped_reads2 = glob(prefix + "_dedupe_R2.fq")
+        File? dedupped_reads2 = prefix + "_dedupe_R2.fq"
     }
 
 }
@@ -118,7 +118,7 @@ task Trim {
     }
 
     meta {
-        descritpion: "Trimming of low quality bases and of adapter sequences. Short reads are discarded. A decontamination of synthetic sequences is also pefoermed. If dealing with paired-end reads, when either forward or reverse of a paired-read are discarded, the surviving read is saved on a file of singleton reads."
+        description: "Trimming of low quality bases and of adapter sequences. Short reads are discarded. A decontamination of synthetic sequences is also pefoermed. If dealing with paired-end reads, when either forward or reverse of a paired-read are discarded, the surviving read is saved on a file of singleton reads."
     }
 
     parameter_meta {
@@ -154,10 +154,10 @@ task Trim {
 
     }
 
-    #String cpus = "4"
-    String cpus = "1"
-    #String memory_amount = "32 GB"
-    String memory_amount = "8 GB"
+    String cpus = "4"
+    #String cpus = "1"
+    String memory_amount = "32 GB"
+    #String memory_amount = "8 GB"
 
 
     command <<<
@@ -171,12 +171,12 @@ task Trim {
         #Defines command for trimming of adapters and low quality bases
         if [ ~{library_layout} = "paired" ]; then
             #CMD="bbduk.sh -Xmx"$maxmem" in=~{reads1_file} in2=~{reads2_file} out=~{prefix}_trimmed_R1_tmp.fq out2=~{prefix}_trimmed_R2_tmp.fq outs=~{prefix}_trimmed_singletons_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} threads=~{cpus} tbo tpe ow"
-            #CMD="bbduk.sh in=~{reads1_file} in2=~{reads2_file} out=~{prefix}_trimmed_R1_tmp.fq out2=~{prefix}_trimmed_R2_tmp.fq outs=~{prefix}_trimmed_singletons_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} threads=~{cpus} tbo tpe ow"
-            CMD="bbduk.sh in=~{reads1_file} in2=~{reads2_file} out=~{prefix}_trimmed_R1_tmp.fq out2=~{prefix}_trimmed_R2_tmp.fq outs=~{prefix}_trimmed_singletons_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} tbo tpe ow"
+            CMD="bbduk.sh in=~{reads1_file} in2=~{reads2_file} out=~{prefix}_trimmed_R1_tmp.fq out2=~{prefix}_trimmed_R2_tmp.fq outs=~{prefix}_trimmed_singletons_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} threads=~{cpus} tbo tpe ow"
+            #CMD="bbduk.sh in=~{reads1_file} in2=~{reads2_file} out=~{prefix}_trimmed_R1_tmp.fq out2=~{prefix}_trimmed_R2_tmp.fq outs=~{prefix}_trimmed_singletons_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} tbo tpe ow"
         else
             #CMD="bbduk.sh -Xmx"$maxmem" in=$reads1 out=~{prefix}_trimmed_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} threads=~{cpus} tbo tpe ow"
-            #CMD="bbduk.sh in=$reads1 out=~{prefix}_trimmed_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} threads=~{cpus} tbo tpe ow"
-            CMD="bbduk.sh in=$reads1 out=~{prefix}_trimmed_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} tbo tpe ow"
+            CMD="bbduk.sh in=$reads1 out=~{prefix}_trimmed_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} threads=~{cpus} tbo tpe ow"
+            #CMD="bbduk.sh in=$reads1 out=~{prefix}_trimmed_tmp.fq ktrim=r k=~{kcontaminants} mink=~{mink} hdist=~{hdist} qtrim=rl trimq=~{phred}  minlength=~{min_length} ref=~{adapters_file} qin=~{qin} tbo tpe ow"
         fi
 
         #Logs version of the software and executed command (BBMap prints on stderr)
@@ -221,8 +221,8 @@ task Trim {
         #that exists iif the library layout was 'paired')
         if [ ~{library_layout} = "paired" ]; then
             #CMD="bbduk.sh -Xmx"$maxmem" in=~{prefix}_trimmed_singletons_tmp.fq out=~{prefix}_trimmed.fq k=31 ref=~{phix174ill_file},~{artifacts_file} qin=~{qin} threads=~{cpus} ow"
-            #CMD="bbduk.sh in=~{prefix}_trimmed_singletons_tmp.fq out=~{prefix}_trimmed.fq k=31 ref=~{phix174ill_file},~{artifacts_file} qin=~{qin} threads=~{cpus} ow"
-            CMD="bbduk.sh in=~{prefix}_trimmed_singletons_tmp.fq out=~{prefix}_trimmed.fq k=31 ref=~{phix174ill_file},~{artifacts_file} qin=~{qin} ow"
+            CMD="bbduk.sh in=~{prefix}_trimmed_singletons_tmp.fq out=~{prefix}_trimmed.fq k=31 ref=~{phix174ill_file},~{artifacts_file} qin=~{qin} threads=~{cpus} ow"
+            #CMD="bbduk.sh in=~{prefix}_trimmed_singletons_tmp.fq out=~{prefix}_trimmed.fq k=31 ref=~{phix174ill_file},~{artifacts_file} qin=~{qin} ow"
 
             echo "Executing command: $CMD "
             echo " "
@@ -258,7 +258,7 @@ task Trim {
     output {
         File trimmed_reads = prefix + "_trimmed.fq"
         File trimmed_reads_r1 = prefix + "_trimmed_R1.fq"
-        Array[File] trimmed_reads_r2 = glob(prefix + "_trimmed_R2.fq")
+        File? trimmed_reads_r2 = prefix + "_trimmed_R2.fq"
     }
 
 }
@@ -266,8 +266,8 @@ task Trim {
 task Decontaminate {
     input{
         File infile1
-        File infile2
-        File infile12
+        File? infile2
+        File? infile12
         File ref_foreign_genome_gz
         String library_layout
         String prefix
@@ -309,10 +309,10 @@ task Decontaminate {
         bwr: "restrict alignment band to this"
     }
 
-    #String cpus = "4"
-    String cpus = "1"
-    #String memory_amount = "32 GB"
-    String memory_amount = "8 GB"
+    String cpus = "4"
+    #String cpus = "1"
+    String memory_amount = "32 GB"
+    #String memory_amount = "8 GB"
 
     command <<<
         sysdate=$(date)
@@ -321,6 +321,7 @@ task Decontaminate {
         echo " "
         #Sets the maximum memory to the value requested in the config file
         #maxmem=$(echo ~{memory_amount} | sed 's/ //g' | sed 's/B//g')
+        mkdir ref_foreign_genome
         tar -xvf ~{ref_foreign_genome_gz} -C ref_foreign_genome
         #Defines command for decontamination
         if [ ~{library_layout} = "paired" ]; then
@@ -354,22 +355,21 @@ task Decontaminate {
             sed -n '/Read 1 data:/,/N Rate:/p' tmp.log | tail -17
             echo " "
         fi
-    gzip -c ~{prefix}_clean.fq > ~{prefix}_clean.fq.gz
-    nClean=$(wc -l ~{prefix}_clean.fq | cut -d" " -f 1)
-    nClean=$((nClean/4))
-    nCont=$(wc -l ~{prefix}_cont.fq | cut -d" " -f 1)
-    nCont=$((nCont/4))
-    echo "$nClean reads survived decontamination ($nCont reads removed)"
-    echo " "
-    #Measures and log execution time
-    endtime=$(date +%s.%N)
-    exectime=$(echo "$endtime $starttime" | awk '{print $1-$2}')
-    sysdate=$(date)
-    echo "STEP 3 (Quality Control) terminated at $sysdate ($exectime seconds)"
-    echo " "
-    echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    echo ""
-    """
+        gzip -c ~{prefix}_clean.fq > ~{prefix}_clean.fq.gz
+        nClean=$(wc -l ~{prefix}_clean.fq | cut -d" " -f 1)
+        nClean=$((nClean/4))
+        nCont=$(wc -l ~{prefix}_cont.fq | cut -d" " -f 1)
+        nCont=$((nCont/4))
+        echo "$nClean reads survived decontamination ($nCont reads removed)"
+        echo " "
+        #Measures and log execution time
+        endtime=$(date +%s.%N)
+        exectime=$(echo "$endtime $starttime" | awk '{print $1-$2}')
+        sysdate=$(date)
+        echo "STEP 3 (Quality Control) terminated at $sysdate ($exectime seconds)"
+        echo " "
+        echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+        echo ""
     >>>
 
     runtime {
@@ -388,6 +388,8 @@ task Decontaminate {
 task QualityAssessment {
     input {
         File reads
+        File logqc_file
+        File fastqc_file
         String step
         String stem
         String label
@@ -411,10 +413,11 @@ task QualityAssessment {
         prefix: "Filename prefix"
     }
 
-    #String cpus = "4"
-    String cpus = "1"
+    String cpus = "4"
+    #String cpus = "1"
     #String memory_amount = "32 GB"
     String memory_amount = "8 GB"
+    #fix line 431 to go to standard out
     command <<<
         #Measures execution time
         sysdate=$(date)
@@ -432,22 +435,21 @@ task QualityAssessment {
         echo " "
 
         #Does QC, extracts relevant information, and removes temporary files
-        bash fastQC.sh ~{reads} ~{prefix}~{stem}~{label} ~{cpus} ~{reads}
+        bash ~{fastqc_file} ~{reads} ~{prefix}~{stem}~{label} ~{cpus} ~{reads}
 
         #Logging QC statistics (number of sequences, Pass/warning/fail, basic statistics, duplication level, kmers)
         base=$(basename ~{reads})
         #change last arg to standard out
-        bash logQC.sh $base ~{prefix}~{stem}~{label}_fastqc_data.txt .log.$step$label
+        bash ~{logqc_file} $base ~{prefix}~{stem}~{label}_fastqc_data.txt /dev/stdout
 
         #Measures and log execution time
         endtime=$(date +%s.%N)
         exectime=$(echo "$endtime $starttime" | awk '{print $1-$2}')
         sysdate=$(date)
         echo "Quality assessment on ~{reads} terminated at $sysdate ($exectime seconds)"
-        echo " " >>
+        echo " "
         echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
         echo " "
-        """
     >>>
 
     runtime {
@@ -458,8 +460,8 @@ task QualityAssessment {
     }
 
     output {
-        File html_file = prefix + stem + label + ".html"
-        File fastqc_data_file = prefix + stem + label + ".zip"
+        File html_file = prefix + stem + label + "_fastqc.html"
+        File fastqc_data_file = prefix + stem + label + "_fastqc_data.txt"
     }
 }
 
@@ -469,7 +471,7 @@ task ProfileTaxa {
         File mpa_pkl_file
         #Care this looks like a Dir, maybe provide a tar.gz
         File bowtie2db_gz_file
-        String bowtiedb_files_name
+        String bowtie2db_files_name
         String bt2_options
         String prefix
         String docker_image
@@ -492,16 +494,16 @@ task ProfileTaxa {
             description: "BowTie2 resources for MetaPhlAn2",
             extension: ['gz']
         }
-        bowtiedb_files_name: "BowTie2 resource name"
+        bowtie2db_files_name: "BowTie2 resource name"
         bt2_options: "presets options for BowTie2"
         prefix: "Filename prefix"
 
     }
 
-    #String cpus = "4"
-    String cpus = "1"
-    #String memory_amount = "32 GB"
-    String memory_amount = "8 GB"
+    String cpus = "4"
+    #String cpus = "1"
+    String memory_amount = "32 GB"
+    #String memory_amount = "8 GB"
 
     #unzip bowtie2db to a folder and pass as arg
     command <<<
@@ -513,7 +515,7 @@ task ProfileTaxa {
         tar -xvf ~{bowtie2db_gz_file} -C bowtie2db
 
         #Defines command for estimating abundances
-        CMD="metaphlan2.py --input_type fastq --tmp_dir=. --biom ~{prefix}.biom --bowtie2out=~{prefix}_bt2out.txt --mpa_pkl ~{mpa_pkl_file}  --bowtie2db bowtie2db/~{bowtiedb_files_name} --bt2_ps ~{bt2_options} --nproc ~{cpus} ~{in_file} ~{prefix}_metaphlan_bugs_list.tsv"
+        CMD="metaphlan2.py --input_type fastq --tmp_dir=. --biom ~{prefix}.biom --bowtie2out=~{prefix}_bt2out.txt --mpa_pkl ~{mpa_pkl_file}  --bowtie2db bowtie2db/~{bowtie2db_files_name} --bt2_ps ~{bt2_options} --nproc ~{cpus} ~{in_file} ~{prefix}_metaphlan_bugs_list.tsv"
         #Logs version of the software and executed command
         #MetaPhlAn prints on stderr
         version=$(metaphlan2.py --version 2>&1 >/dev/null | grep "MetaPhlAn")
@@ -683,10 +685,10 @@ task ProfileFunction{
         }
     }
 
-    #String cpus = "4"
-    String cpus = "1"
-    #String memory_amount = "32 GB"
-    String memory_amount = "8 GB"
+    String cpus = "4"
+    #String cpus = "1"
+    String memory_amount = "32 GB"
+    #String memory_amount = "8 GB"
     #deal with gz files can we pas the correct files or do we pass the whole directory?
     command <<<
         #Measures execution time
